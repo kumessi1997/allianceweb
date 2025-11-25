@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Azladin Digital Healthcare Detail">
+    <meta property="og:description" content="Check out this Rive animation hosted on GitHub Pages!">
+    <meta property="og:image" content="https://raw.githubusercontent.com/kumessi1997/rive-host/main/thumbnail.png">
+    <meta property="og:url" content="https://raw.githubusercontent.com/kumessi1997/rive-host/main/thumbnail.png">
+    <meta property="og:type" content="website">
+    <title>FPT Health Solution</title>
+    <script src="https://unpkg.com/@rive-app/webgl2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.32/dist/lenis.min.js"></script>
+    <style>
+        /* Reset and base styles */
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Make the body take full screen and center the canvas */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            background-color: #1E1E1E;
+            overflow: hidden; /* Prevent scrollbars */
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body.contact-mode {
+            overflow-y: auto;
+            align-items: flex-start;
+        }
+
+        /* Responsive canvas container */
+        #canvasContainer {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Site logo (shows with contact form) */
+        .site-logo {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            z-index: 10;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .site-logo img {
+            height: 40px;
+            width: auto;
+            display: block;
+        }
+
+        body.contact-mode .site-logo {
+            display: flex;
+        }
+
+        /* Style the canvas to be responsive */
+        canvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            position: relative;
+            z-index: 1;
+            mix-blend-mode: normal;
+            /* Maintain aspect ratio while being responsive */
+            object-fit: contain;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #contactForm {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background-color: #111;
+            color: #f5f5f5;
+        }
+
+        .contact-wrapper {
+            width: min(640px, 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .contact-wrapper h1 {
+            margin: 0;
+            font-size: clamp(2rem, 3vw, 3rem);
+            text-align: center;
+        }
+
+        .contact-wrapper p {
+            margin: 0;
+            text-align: center;
+            color: #c7c7c7;
+            line-height: 1.5;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .row input {
+            width: 100%;
+        }
+
+        input,
+        textarea,
+        button {
+            padding: 0.85rem 1rem;
+            background: #1e1e1e;
+            border: 1px solid #3c3c3c;
+            color: #f0f0f0;
+            font-size: 1rem;
+            border-radius: 2px;
+        }
+
+        textarea {
+            min-height: 160px;
+            resize: vertical;
+        }
+
+        button {
+            width: fit-content;
+            padding-inline: 2.5rem;
+            background: transparent;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        button:hover {
+            background: #f0f0f0;
+            color: #111;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            body {
+                /* Ensure proper mobile viewport handling */
+                -webkit-text-size-adjust: 100%;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            canvas {
+                /* Optimize for mobile screens */
+                width: 100vw;
+                height: 100vh;
+                object-fit: cover;
+            }
+
+            .row {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        /* Tablet optimizations */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            canvas {
+                width: 100vw;
+                height: 100vh;
+                object-fit: contain;
+            }
+        }
+
+        /* Desktop optimizations */
+        @media (min-width: 1025px) {
+            canvas {
+                width: 100vw;
+                height: 100vh;
+                object-fit: contain;
+            }
+        }
+
+        /* Landscape orientation adjustments */
+        @media (orientation: landscape) and (max-height: 500px) {
+            canvas {
+                width: 100vw;
+                height: 100vh;
+                object-fit: cover;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="#" class="site-logo">
+        <img src="Source/logo.png" alt="Logo">
+    </a>
+    <div id="canvasContainer">
+        <canvas id="riveCanvas"></canvas>
+    </div>
+    <div id="contactForm" class="hidden">
+        <div class="contact-wrapper">
+            <h1>Liên hệ</h1>
+            <p>We'd love to hear from you! Please fill out the form below and we'll get back to you as soon as possible.</p>
+            <form>
+                <div class="row">
+                    <input type="text" placeholder="Họ">
+                    <input type="text" placeholder="Tên">
+                </div>
+                <input type="email" placeholder="Email">
+                <textarea placeholder="Lời nhắn"></textarea>
+                <button type="button">Liên hệ</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let r; // Declare rive instance globally for resize handling
+        let lenisInstance = null;
+        
+        // Function to get optimal canvas dimensions
+        function getOptimalCanvasSize() {
+            const container = document.getElementById('canvasContainer');
+            const containerRect = container.getBoundingClientRect();
+            
+            // Get device pixel ratio for crisp rendering
+            const dpr = window.devicePixelRatio || 1;
+            
+            // Calculate optimal size based on container and device capabilities
+            const width = Math.min(containerRect.width, window.innerWidth);
+            const height = Math.min(containerRect.height, window.innerHeight);
+            
+            return {
+                width: width * dpr,
+                height: height * dpr,
+                displayWidth: width,
+                displayHeight: height
+            };
+        }
+
+        // Function to resize canvas and Rive animation
+        function resizeCanvas() {
+            if (!r) return;
+            
+            const { width, height, displayWidth, displayHeight } = getOptimalCanvasSize();
+            const canvas = document.getElementById("riveCanvas");
+            
+            // Set canvas display size
+            canvas.style.width = displayWidth + 'px';
+            canvas.style.height = displayHeight + 'px';
+            
+            // Set canvas internal size (for crisp rendering)
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Resize Rive animation
+            r.resizeDrawingSurfaceToCanvas();
+        }
+
+        const SCROLL_MIN = 0;
+        const SCROLL_MAX = 100;
+        const SCROLL_SENSITIVITY = 0.01;
+        console.log("Scroll bounds:", {
+            min: SCROLL_MIN,
+            max: SCROLL_MAX,
+            sensitivity: SCROLL_SENSITIVITY
+        });
+        let scrollNumberInput = null;
+        let wheelListenerAttached = false;
+
+        function enableWheelListener() {
+            if (!wheelListenerAttached && scrollNumberInput) {
+                window.addEventListener("wheel", handleWheel, { passive: false });
+                wheelListenerAttached = true;
+            }
+        }
+
+        function disableWheelListener() {
+            if (wheelListenerAttached) {
+                window.removeEventListener("wheel", handleWheel);
+                wheelListenerAttached = false;
+            }
+        }
+
+        function showContactForm() {
+            const canvasContainer = document.getElementById('canvasContainer');
+            const contactForm = document.getElementById('contactForm');
+            if (canvasContainer) {
+                canvasContainer.classList.add('hidden');
+            }
+            if (contactForm) {
+                contactForm.classList.remove('hidden');
+            }
+            document.body.classList.add('contact-mode');
+            disableWheelListener();
+            lenisInstance?.start();
+        }
+
+        function hideContactForm() {
+            const canvasContainer = document.getElementById('canvasContainer');
+            const contactForm = document.getElementById('contactForm');
+            if (canvasContainer) {
+                canvasContainer.classList.remove('hidden');
+            }
+            if (contactForm) {
+                contactForm.classList.add('hidden');
+            }
+            document.body.classList.remove('contact-mode');
+            enableWheelListener();
+            lenisInstance?.stop();
+        }
+
+        function onRiveEventReceived(riveEvent) {
+            const eventData = riveEvent.data;
+            console.log(eventData);
+
+            if (eventData.name === "akaweb3") {
+                if (eventData.url) {
+                    window.open(eventData.url);
+                } else {
+                    alert('No URL provided for this event!');
+                }
+            } else if (eventData.name === "akafb3") {
+                if (eventData.url) {
+                    window.open(eventData.url);
+                } else {
+                    alert('No URL provided for this event!');
+                }
+            } else if (eventData.name === "akalink3") {
+                if (eventData.url) {
+                    window.open(eventData.url);
+                } else {
+                    alert('No URL provided for this event!');
+                }
+            } else if (eventData.name === "Contact Us") {
+                showContactForm();
+            }
+        }
+
+        function handleWheel(event) {
+            if (!scrollNumberInput) return;
+            event.preventDefault();
+
+            const nextValue = Math.min(
+                SCROLL_MAX,
+                Math.max(
+                    SCROLL_MIN,
+                    scrollNumberInput.value + event.deltaY * SCROLL_SENSITIVITY
+                )
+            );
+
+            scrollNumberInput.value = nextValue;
+            console.log("scrollNumberInput current value:", scrollNumberInput.value);
+        }
+
+        function initLenis() {
+            if (typeof Lenis === "undefined") {
+                console.warn("Lenis library not found");
+                return;
+            }
+
+            lenisInstance = new Lenis({
+                autoResize: true,
+                smoothTouch: false,
+                smoothWheel: true,
+            });
+
+            function raf(time) {
+                lenisInstance?.raf(time);
+                requestAnimationFrame(raf);
+            }
+
+            requestAnimationFrame(raf);
+            lenisInstance.stop(); // Disable during Rive interaction
+        }
+
+        // Load Rive Animation
+        r = new rive.Rive({
+            src: "alliance.riv", // Ensure this file is in the same directory or provide the correct path
+            canvas: document.getElementById("riveCanvas"),
+            autoplay: true, // Start animation automatically
+            autoBind: true,
+            stateMachines: "State Machine 1", // Match your state machine name
+            artboard: "Main page", // Specify the artboard
+            onLoad: () => {
+                console.log("Rive animation loaded successfully");
+                const inputs = r.stateMachineInputs("State Machine 1") || [];
+                scrollNumberInput = inputs.find((input) => input.name === "scroll number");
+                console.log("scrollNumberInput initial value:", scrollNumberInput?.value ?? "not found");
+                r.on(rive.EventType.RiveEvent, onRiveEventReceived);
+
+                if (!scrollNumberInput) {
+                    console.warn('Input "scroll number" not found on State Machine 1');
+                } else {
+                    enableWheelListener();
+                }
+
+                // Initial resize after load
+                resizeCanvas();
+            },
+            onLoadError: (err) => {
+                console.error("Error loading Rive animation:", err);
+            },
+          
+        });
+
+        // Debounced resize handler for better performance
+        let resizeTimeout;
+        function handleResize() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                resizeCanvas();
+            }, 100); // Debounce resize events
+        }
+
+        // Event listeners for responsive behavior
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', () => {
+            // Handle orientation changes with a slight delay
+            setTimeout(() => {
+                resizeCanvas();
+            }, 200);
+        });
+
+    
+        // Handle visibility change (when tab becomes active/inactive)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && r) {
+                // Redraw when tab becomes visible
+                setTimeout(() => {
+                    resizeCanvas();
+                }, 100);
+            }
+        });
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            const logo = document.querySelector('.site-logo');
+            if (logo) {
+                logo.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    hideContactForm();
+                });
+            }
+            initLenis();
+            resizeCanvas();
+        });
+    </script>
+
+  
+
+</body>
+</html>
