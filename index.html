@@ -116,6 +116,43 @@
             line-height: 1.5;
         }
 
+        .video-modal {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 20;
+        }
+
+        .video-content {
+            position: relative;
+            width: min(960px, 100%);
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border: 1px solid #333;
+        }
+
+        .video-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            border: none;
+            background: rgba(17, 17, 17, 0.7);
+            color: #fff;
+            padding: 0.4rem 0.6rem;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .video-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
         form {
             display: flex;
             flex-direction: column;
@@ -236,6 +273,20 @@
             </form>
         </div>
     </div>
+    <div id="videoModal" class="video-modal hidden">
+        <div class="video-content">
+            <button class="video-close" aria-label="Close video">&times;</button>
+            <iframe
+                class="video-frame"
+                src=""
+                data-video-src="https://www.youtube.com/embed/qQNuoySpVMc?rel=0&modestbranding=1"
+                title="YouTube video player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+            ></iframe>
+        </div>
+    </div>
 
     <script>
         let r; // Declare rive instance globally for resize handling
@@ -283,6 +334,8 @@
         const SCROLL_MIN = 0;
         const SCROLL_MAX = 100;
         const SCROLL_SENSITIVITY = 0.01;
+        const VIDEO_EVENT_NAME = "Play Video";
+        const VIDEO_MODAL_ID = "videoModal";
         console.log("Scroll bounds:", {
             min: SCROLL_MIN,
             max: SCROLL_MAX,
@@ -333,30 +386,33 @@
             lenisInstance?.stop();
         }
 
+        function showVideoModal() {
+            const modal = document.getElementById(VIDEO_MODAL_ID);
+            if (!modal) return;
+            const iframe = modal.querySelector('iframe');
+            if (iframe && iframe.dataset.videoSrc) {
+                iframe.src = iframe.dataset.videoSrc;
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function hideVideoModal() {
+            const modal = document.getElementById(VIDEO_MODAL_ID);
+            if (!modal) return;
+            const iframe = modal.querySelector('iframe');
+            if (iframe) {
+                iframe.src = "";
+            }
+            modal.classList.add('hidden');
+        }
+
         function onRiveEventReceived(riveEvent) {
             const eventData = riveEvent.data;
             console.log(eventData);
-
-            if (eventData.name === "akaweb3") {
-                if (eventData.url) {
-                    window.open(eventData.url);
-                } else {
-                    alert('No URL provided for this event!');
-                }
-            } else if (eventData.name === "akafb3") {
-                if (eventData.url) {
-                    window.open(eventData.url);
-                } else {
-                    alert('No URL provided for this event!');
-                }
-            } else if (eventData.name === "akalink3") {
-                if (eventData.url) {
-                    window.open(eventData.url);
-                } else {
-                    alert('No URL provided for this event!');
-                }
-            } else if (eventData.name === "Contact Us") {
+            if (eventData.name === "Contact Us") {
                 showContactForm();
+            } else if (eventData.name === VIDEO_EVENT_NAME) {
+                showVideoModal();
             }
         }
 
@@ -465,6 +521,16 @@
                     hideContactForm();
                 });
             }
+            const videoModal = document.getElementById(VIDEO_MODAL_ID);
+            const closeButton = videoModal?.querySelector('.video-close');
+            if (closeButton) {
+                closeButton.addEventListener('click', hideVideoModal);
+            }
+            videoModal?.addEventListener('click', (event) => {
+                if (event.target === videoModal) {
+                    hideVideoModal();
+                }
+            });
             initLenis();
             resizeCanvas();
         });
